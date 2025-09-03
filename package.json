@@ -1,6 +1,6 @@
 {
   "name": "winston-colored-logger",
-  "version": "0.0.8",
+  "version": "0.0.3",
   "description": "Minimal Winston logger with colors, rotation and optional S3/Azure upload",
   "homepage": "https://github.com/kaustubhakalucifer/winston-colored-logger#readme",
   "bugs": {

@@ -1,0 +1,44 @@
+{
+  "name": "winston-colored-logger",
+  "version": "0.0.1",
+  "description": "Minimal Winston logger with colors, rotation and optional S3/Azure upload",
+  "homepage": "https://github.com/kaustubhakalucifer/winston-colored-logger#readme",
+  "bugs": {
+    "url": "https://github.com/kaustubhakalucifer/winston-colored-logger/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaustubhakalucifer/winston-colored-logger.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint 'src/**/*.{ts,js}' --fix",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@azure/storage-blob": "^12.28.0",
+    "aws-sdk": "^2.1692.0",
+    "dayjs": "^1.11.18",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.3.0",
+    "@types/winston": "^2.4.4",
+    "jest": "^30.1.3",
+    "ts-jest": "^29.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}

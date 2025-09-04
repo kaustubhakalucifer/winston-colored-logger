@@ -1,4 +1,5 @@
-import AWS from "aws-sdk";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+
 import { BlobServiceClient } from "@azure/storage-blob";
 import DailyRotateFile from "winston-daily-rotate-file";
 import dayjs from "dayjs";
@@ -30,39 +31,50 @@ function setupCloudUpload(
   s3Config?: LoggerConfig["s3Config"],
   azureConfig?: LoggerConfig["azureConfig"]
 ) {
-  transport.on("new", (filename: string) => {
-    if (cloud === "s3" && s3Config) {
-      const s3 = new AWS.S3({
-        accessKeyId: s3Config.accessKeyId,
-        secretAccessKey: s3Config.secretAccessKey,
-        region: s3Config.region,
-      });
+  transport.on("new", async (filename: string) => {
+    const fileStream = fs.createReadStream(filename);
+    const key = `logs/${filename.split("/").pop()}`;
 
-      s3.upload(
-        {
-          Bucket: s3Config.bucket,
-          Key: `logs/${filename.split("/").pop()}`,
-          Body: fs.createReadStream(filename),
-        },
-        (err) => {
-          if (err) console.error("S3 upload error:", err);
-        }
-      );
+    if (cloud === "s3" && s3Config) {
+      try {
+        const s3 = new S3Client({
+          region: s3Config.region,
+          credentials: {
+            accessKeyId: s3Config.accessKeyId,
+            secretAccessKey: s3Config.secretAccessKey,
+          },
+        });
+
+        await s3.send(
+          new PutObjectCommand({
+            Bucket: s3Config.bucket,
+            Key: key,
+            Body: fileStream,
+          })
+        );
+
+        console.log(`✅ Uploaded log to S3: ${key}`);
+      } catch (err) {
+        console.error("❌ S3 upload error:", err);
+      }
     }
 
     if (cloud === "azure" && azureConfig) {
-      const blobServiceClient = BlobServiceClient.fromConnectionString(
-        azureConfig.connectionString
-      );
-      const containerClient = blobServiceClient.getContainerClient(
-        azureConfig.container
-      );
+      try {
+        const blobServiceClient = BlobServiceClient.fromConnectionString(
+          azureConfig.connectionString
+        );
+        const containerClient = blobServiceClient.getContainerClient(
+          azureConfig.container
+        );
 
-      const blockBlobClient = containerClient.getBlockBlobClient(
-        `logs/${filename.split("/").pop()}`
-      );
+        const blockBlobClient = containerClient.getBlockBlobClient(key);
+        await blockBlobClient.uploadFile(filename);
 
-      blockBlobClient.uploadFile(filename).catch(console.error);
+        console.log(`✅ Uploaded log to Azure Blob: ${key}`);
+      } catch (err) {
+        console.error("❌ Azure upload error:", err);
+      }
     }
   });
 }

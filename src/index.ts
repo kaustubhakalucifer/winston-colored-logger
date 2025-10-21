@@ -4,7 +4,7 @@ import { BlobServiceClient } from "@azure/storage-blob";
 import DailyRotateFile from "winston-daily-rotate-file";
 import dayjs from "dayjs";
 import fs from "fs";
-import winston from "winston";
+import winston, { Logger } from "winston";
 
 export interface LoggerConfig {
   label?: string;
@@ -141,4 +141,4 @@ export const createLogger = (config: LoggerConfig = {}) => {
   });
 };
 
-export const logger = createLogger();
+export const logger: Logger = createLogger();
